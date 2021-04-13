@@ -2,13 +2,12 @@ package org.surkovp.pythonliterals;
 
 import org.junit.jupiter.api.Test;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UtilTests {
 
@@ -98,7 +97,7 @@ class UtilTests {
     void getLiteralLinesEmptyTextTest() {
         assertEquals(
                 Collections.emptyMap(),
-                Util.getLiteralLines(Collections.emptyList())
+                Util.getLiteralLines(Stream.empty())
         );
     }
 
@@ -109,7 +108,7 @@ class UtilTests {
                         "literal", List.of(0, 1, 4),
                         "literal2", Collections.singletonList(1),
                         "literal4", List.of(2, 2)),
-                Util.getLiteralLines(List.of(
+                Util.getLiteralLines(Stream.of(
                         "text 'literal' text #text 'literal2' # 'literal2'",
                         "text \"literal2\" \"literal\"",
                         "'literal4' text 'literal4'",
@@ -125,7 +124,7 @@ class UtilTests {
                 Map.of(
                         "literal", List.of(0, 1, 4),
                         "literal4", List.of(2, 2)),
-                Util.getLiteralLinesOccurringAtLeastOnce(List.of(
+                Util.getLiteralLinesOccurringAtLeastOnce(Stream.of(
                         "text 'literal' text #text 'literal2' # 'literal2'",
                         "text \"literal2\" \"literal\"",
                         "'literal4' text 'literal4'",
