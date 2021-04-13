@@ -94,6 +94,38 @@ class UtilTests {
     }
 
     @Test
+    void getLiteralsEscapeLiterals() {
+        assertEquals(
+                Collections.emptyList(),
+                Util.getLiterals("'text\\'")
+        );
+        assertEquals(
+                Collections.emptyList(),
+                Util.getLiterals("\"text\\\"")
+        );
+    }
+
+    @Test
+    void getLiteralsSharpInLiteral() {
+        assertEquals(
+                Collections.singletonList("li#eral"),
+                Util.getLiterals("'li#eral'")
+        );
+    }
+
+    @Test
+    void getLiteralsManyEscapes() {
+        assertEquals(
+                Collections.singletonList("literal"),
+                Util.getLiterals("\\\\'literal'")
+        );
+        assertEquals(
+                Collections.emptyList(),
+                Util.getLiterals("\\\\\\'literal'")
+        );
+    }
+
+    @Test
     void getLiteralLinesEmptyTextTest() {
         assertEquals(
                 Collections.emptyMap(),
@@ -107,13 +139,15 @@ class UtilTests {
                 Map.of(
                         "literal", List.of(0, 1, 4),
                         "literal2", Collections.singletonList(1),
-                        "literal4", List.of(2, 2)),
+                        "literal4", List.of(2, 2),
+                        "li#eral", Collections.singletonList(5)),
                 Util.getLiteralLines(Stream.of(
                         "text 'literal' text #text 'literal2' # 'literal2'",
                         "text \"literal2\" \"literal\"",
                         "'literal4' text 'literal4'",
                         "text",
-                        "'literal'")
+                        "'literal'",
+                        "'li#eral'")
                 )
         );
     }
@@ -129,7 +163,19 @@ class UtilTests {
                         "text \"literal2\" \"literal\"",
                         "'literal4' text 'literal4'",
                         "text",
-                        "'literal'")
+                        "'literal'",
+                        "'li#eral")
+                )
+        );
+    }
+
+    @Test
+    void getLiteralLinesOccurringAtLeastOnceEscapeQuotes() {
+        assertEquals(
+                Collections.singletonMap("a ' b", List.of(0, 1)),
+                Util.getLiteralLinesOccurringAtLeastOnce(Stream.of(
+                        "x = 'a \\' b'",
+                        "y = 'a \\' b'")
                 )
         );
     }

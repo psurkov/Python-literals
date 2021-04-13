@@ -2,24 +2,59 @@ package org.surkovp.pythonliterals;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.regex.MatchResult;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Util {
-    private static final Pattern literalPattern = Pattern.compile("(['\"]).*?\\1");
 
     public static @NotNull List<String> getLiterals(@NotNull String line) {
-        return literalPattern.matcher(
-                line.split("#", 2)[0]
-        ).results()
-                .map(MatchResult::group)
-                .map(s -> s.substring(1, s.length() - 1))
-                .collect(Collectors.toList());
+        char[] chars = line.toCharArray();
+        boolean isEscaping = false;
+        boolean isSmallQuote = false;
+        boolean isBigQuote = false;
+        List<String> literals = new ArrayList<>();
+        StringBuilder currentQuote = new StringBuilder();
+        for (char c : chars) {
+            if (isEscaping) {
+                isEscaping = false;
+                if (isSmallQuote || isBigQuote) {
+                    currentQuote.append(c);
+                }
+                continue;
+            }
+            if (c == '\'') {
+                if (isSmallQuote) {
+                    literals.add(currentQuote.toString());
+                    currentQuote.setLength(0);
+                }
+                isSmallQuote = !isSmallQuote;
+                continue;
+            }
+            if (c == '"') {
+                if (isBigQuote) {
+                    literals.add(currentQuote.toString());
+                    currentQuote.setLength(0);
+                }
+                isBigQuote = !isBigQuote;
+                continue;
+            }
+            if (c == '\\') {
+                isEscaping = true;
+                continue;
+            }
+            if (isSmallQuote || isBigQuote) {
+                currentQuote.append(c);
+                continue;
+            }
+            if (c == '#') {
+                break;
+            }
+        }
+        return literals;
     }
 
     public static Map<String, List<Integer>> getLiteralLines(@NotNull Stream<@NotNull String> lines) {
